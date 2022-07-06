@@ -18,4 +18,11 @@ model User {
   updatedAt DateTime @updatedAt
   email     String   @unique
   password  String
+  profile   Profile
+}
+
+// composite type
+type Profile {
+  firstName String
+  lastName  String
 }
