@@ -66,16 +66,31 @@ export async function login({ email, password }: LoginForm) {
 
   return createUserSession(user.id, "/");
 }
-
+/* checks for user session, if truthy, returns userId,
+   otherwise, redirects to login page
+*/
 export async function requireUserId(
   request: Request,
   redirectTo: string = new URL(request.url).pathname
-) {}
+) {
+  const session = await getUserSession(request);
+  const userId = session.get("userId");
+  if (!userId || typeof userId !== "string") {
+    const searchParams = new URLSearchParams([["redirectTo", redirectTo]]);
+    return redirect(`/login/${searchParams}`);
+  }
 
+  return userId;
+}
+
+
+/* grabs the user session based on the request's cookie */
 function getUserSession(request: Request) {
   return storage.getSession(request.headers.get("Cookie"));
 }
 
+
+/* returns the current user's id from the session storage */
 async function getUserId(request: Request) {
   const session = await getUserSession(request);
   const userId = session.get("userId");
@@ -85,6 +100,9 @@ async function getUserId(request: Request) {
   return userId;
 }
 
+/* returns the whole `user` document associated with the current session. 
+   If one is not found, the user is logged out
+*/
 export async function getUser(request: Request) {
   const userId = await getUserId(request);
   if (typeof userId !== "string") return null;
@@ -100,6 +118,8 @@ export async function getUser(request: Request) {
   }
 }
 
+
+/* destroys the current session and redirects the user to the login screen */
 export async function logout(request: Request) {
   const session = await getUserSession(request);
   return redirect("/login", {
@@ -108,5 +128,3 @@ export async function logout(request: Request) {
     },
   });
 }
-
-
