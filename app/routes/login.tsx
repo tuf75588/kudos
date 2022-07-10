@@ -1,7 +1,12 @@
 import Layout from '~/components/layout';
 import FormField from '~/components/form-field';
 import React, { useState } from 'react';
-// app/routes/login.tsx
+import type { ActionFunction } from '@remix-run/node';
+
+
+
+export const action: ActionFunction = async ({request}) => { };
+
 export default function Login() {
   const [action, setAction] = useState('login');
   const [formData, setFormData] = useState({
