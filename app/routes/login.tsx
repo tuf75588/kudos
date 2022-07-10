@@ -1,9 +1,12 @@
 import Layout from '~/components/layout';
 import FormField from '~/components/form-field';
 import React, { useState } from 'react';
-import { ActionFunction, json } from '@remix-run/node';
+import type { LoaderFunction, ActionFunction } from '@remix-run/node';
+import { json } from '@remix-run/node';
 import { validateEmail, validateName, validatePassword } from '~/utils/validators.server';
 import { login, register } from '~/utils/auth.server';
+
+
 
 
 
@@ -67,7 +70,7 @@ export default function Login() {
 
   const handleInputChange = (
     event: React.ChangeEvent<HTMLInputElement>,
-    [field]: string
+    field: string
   ) => {
     setFormData((form) => ({ ...form, [field]: event.target.value }));
   };
