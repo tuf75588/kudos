@@ -1,7 +1,8 @@
-export default function UserPanel() {
+// app/components/user-panel.tsx
+export function UserPanel() {
   return (
     <div className="w-1/6 bg-gray-200 flex flex-col">
-      <div className="text-center bg-gray-300 h-20 flex items-center justfiy-center">
+      <div className="text-center bg-gray-300 h-20 flex justify-center items-center">
         <h2 className="text-xl text-blue-600 font-semibold">My Team</h2>
       </div>
       <div className="flex-1 overflow-y-scroll py-4 flex flex-col gap-y-10">
