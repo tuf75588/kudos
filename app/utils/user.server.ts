@@ -30,10 +30,10 @@ export const getOtherUsers = async (userId: string) => {
   });
 };
 
-// export const getUserById = async (userId: string) => {
-//   return await prisma.user.findUnique({
-//     where: {
-//       id: userId,
-//     },
-//   });
-// };
+export const getUserById = async (userId: string) => {
+  return await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+};

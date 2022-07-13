@@ -8,6 +8,7 @@ import { Outlet, useLoaderData } from '@remix-run/react';
 export const loader: LoaderFunction = async ({ request, params }) => {
   const userId = await requireUserId(request);
   const users = await getOtherUsers(userId);
+  console.log(users);
   return json({ users });
 };
 export default function HomeRoute() {
