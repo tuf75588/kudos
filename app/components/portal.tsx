@@ -1,3 +1,5 @@
+// app/components/portal.tsx
+
 import { createPortal } from 'react-dom';
 import { useState, useEffect } from 'react';
 
@@ -9,12 +11,11 @@ interface props {
 const createWrapper = (wrapperId: string) => {
   const wrapper = document.createElement('div');
   wrapper.setAttribute('id', wrapperId);
-
-  document.appendChild(wrapper);
+  document.body.appendChild(wrapper);
   return wrapper;
 };
 
-export const Portal: React.FC<props> = ({ children, wrapperId }: props) => {
+export const Portal: React.FC<props> = ({ children, wrapperId }) => {
   const [wrapper, setWrapper] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -25,6 +26,7 @@ export const Portal: React.FC<props> = ({ children, wrapperId }: props) => {
       created = true;
       element = createWrapper(wrapperId);
     }
+
     setWrapper(element);
 
     return () => {
@@ -33,6 +35,7 @@ export const Portal: React.FC<props> = ({ children, wrapperId }: props) => {
       }
     };
   }, [wrapperId]);
+
   if (wrapper === null) return null;
 
   return createPortal(children, wrapper);
