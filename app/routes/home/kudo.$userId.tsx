@@ -34,7 +34,6 @@ export default function KudoModal() {
       emoji: 'THUMBSUP',
     } as KudoStyle,
   });
-
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     field: string
