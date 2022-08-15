@@ -1,13 +1,14 @@
 import { json, redirect } from '@remix-run/node';
+import React, { useState } from 'react';
 import type { ActionFunction, LoaderFunction } from '@remix-run/node';
 import { useActionData, useLoaderData } from '@remix-run/react';
 import { getUserById } from '~/utils/user.server';
 import { Modal } from '~/components/modal';
 import { getUser } from '~/utils/auth.server';
 import { UserCircle } from '~/components/user-circle';
-import React, { useState } from 'react';
 import type { KudoStyle } from '@prisma/client';
-
+import { SelectBox } from '~/components/select-box';
+import { colorMap, emojiMap } from '~/utils/constants';
 export const loader: LoaderFunction = async ({ request, params }) => {
   const { userId } = params;
   const user = await getUser(request);
@@ -40,6 +41,27 @@ export default function KudoModal() {
   ) => {
     setFormData((data) => ({ ...data, [field]: e.currentTarget.value }));
   };
+
+
+  const handleStyleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: string) => {
+    setFormData((data) => ({
+      ...data, style: {
+        ...data.style,
+        [field]: e.currentTarget.value
+      }
+    }))
+  }
+
+  const getOptions = (data: any) => Object.keys(data).reduce((acc: any[], curr) => {
+    acc.push({
+      name: curr.charAt(0).toLocaleUpperCase() + curr.slice(1).toLocaleLowerCase(),
+      value: curr,
+    });
+    return acc;
+  }, [])
+
+  const colors = getOptions(colorMap)
+  const emojis = getOptions(emojiMap)
 
   const { recipient, user } = useLoaderData();
 
@@ -75,7 +97,33 @@ export default function KudoModal() {
               placeholder={`Say something nice about ${recipient.profile.firstName}...`}
             />
             <div className="flex flex-col items-center md:flex-row md:justify-start gap-x-4">
-              {/* Select Boxes Go Here */}
+              <SelectBox
+                options={colors}
+                name="backgroundColor"
+                value={formData.style.backgroundColor}
+                onChange={e => handleStyleChange(e, 'backgroundColor')}
+                label="Background Color"
+                containerClassName="w-36"
+                className="w-full rounded-xl px-3 py-2 text-gray-400"
+              />
+              <SelectBox
+                options={colors}
+                name="textColor"
+                value={formData.style.textColor}
+                onChange={e => handleStyleChange(e, 'textColor')}
+                label="Text Color"
+                containerClassName="w-36"
+                className="w-full rounded-xl px-3 py-2 text-gray-400"
+              />
+              <SelectBox
+                options={emojis}
+                label="Emoji"
+                name="emoji"
+                value={formData.style.emoji}
+                onChange={e => handleStyleChange(e, 'emoji')}
+                containerClassName="w-36"
+                className="w-full rounded-xl px-3 py-2 text-gray-400"
+              />
             </div>
           </div>
         </div>
