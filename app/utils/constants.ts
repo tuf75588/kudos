@@ -1,4 +1,18 @@
-export const colorMap = {
+type Colors = {
+  RED: string;
+  GREEN: string;
+  BLUE: string;
+  WHITE: string;
+  YELLOW: string;
+}
+
+type Emojis = {
+  THUMBSUP: string;
+  PARTY: string;
+  HANDSUP: string;
+}
+
+export const colorMap: Colors = {
   RED: 'text-red-400',
   GREEN: 'text-green-400',
   BLUE: 'text-blue-400',
@@ -6,7 +20,7 @@ export const colorMap = {
   YELLOW: 'text-yellow-300'
 }
 
-export const backgroundColorMap = {
+export const backgroundColorMap: Colors = {
   RED: 'bg-red-400',
   GREEN: 'bg-green-400',
   BLUE: 'bg-blue-400',
@@ -14,7 +28,7 @@ export const backgroundColorMap = {
   YELLOW: 'bg-yellow-300'
 }
 
-export const emojiMap = {
+export const emojiMap: Emojis = {
   THUMBSUP: '👍',
   PARTY: '🎉',
   HANDSUP: '🙌🏻',

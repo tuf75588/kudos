@@ -4,12 +4,15 @@ import type { ActionFunction, LoaderFunction } from '@remix-run/node';
 import { useActionData, useLoaderData } from '@remix-run/react';
 import { getUserById } from '~/utils/user.server';
 import { Modal } from '~/components/modal';
-import { getUser } from '~/utils/auth.server';
 import { UserCircle } from '~/components/user-circle';
-import type { KudoStyle } from '@prisma/client';
+import type { KudoStyle, Color, Emoji } from '@prisma/client';
 import { SelectBox } from '~/components/select-box';
 import { colorMap, emojiMap } from '~/utils/constants';
 import { Kudo } from '~/components/kudo';
+import { createKudo } from '~/utils/kudos.server';
+import { requireUserId, getUser } from '~/utils/auth.server';
+
+
 export const loader: LoaderFunction = async ({ request, params }) => {
   const { userId } = params;
   const user = await getUser(request);
@@ -22,8 +25,40 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 };
 
 export const action: ActionFunction = async ({ request, params }) => {
-  return {};
-};
+  const userId = await requireUserId(request);
+  const form = await request.formData();
+  const message = form.get('message');
+  const emoji = form.get('emoji');
+  const backgroundColor = form.get('backgroundColor');
+  const textColor = form.get('textColor');
+  const recipientId = form.get('recipientId');
+
+  if (
+    typeof message !== 'string' ||
+    typeof recipientId !== 'string' ||
+    typeof backgroundColor !== 'string' ||
+    typeof textColor !== 'string' ||
+    typeof emoji !== 'string'
+  )
+    return json({ error: `Invalid form data` }, { status: 400 });
+
+  if (!message.length) {
+    return json({ error: `Please provide a message` }, { status: 400 });
+  }
+
+  if (!recipientId.length) {
+    return json({ error: `No recipent found...` }, { status: 400 })
+  }
+
+  await createKudo(message, userId, recipientId, {
+    backgroundColor: backgroundColor as Color,
+    textColor: textColor as Color,
+    emoji: emoji as Emoji
+  })
+  return redirect('/home');
+}
+
+
 
 export default function KudoModal() {
   const actionData = useActionData();
@@ -36,19 +71,19 @@ export default function KudoModal() {
       emoji: 'THUMBSUP',
     } as KudoStyle,
   });
- 
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: string) => {
     setFormData(data => ({ ...data, [field]: e.target.value }))
-}
+  }
 
-const handleStyleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: string) => {
+  const handleStyleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: string) => {
     setFormData(data => ({
-        ...data, style: {
-            ...data.style,
-            [field]: e.target.value
-        }
+      ...data, style: {
+        ...data.style,
+        [field]: e.target.value
+      }
     }))
-}
+  }
   const getOptions = (data: any) => Object.keys(data).reduce((acc: any[], curr) => {
     acc.push({
       name: curr.charAt(0).toUpperCase() + curr.slice(1).toLowerCase(),
