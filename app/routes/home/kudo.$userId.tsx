@@ -9,6 +9,7 @@ import { UserCircle } from '~/components/user-circle';
 import type { KudoStyle } from '@prisma/client';
 import { SelectBox } from '~/components/select-box';
 import { colorMap, emojiMap } from '~/utils/constants';
+import { Kudo } from '~/components/kudo';
 export const loader: LoaderFunction = async ({ request, params }) => {
   const { userId } = params;
   const user = await getUser(request);
@@ -35,29 +36,25 @@ export default function KudoModal() {
       emoji: 'THUMBSUP',
     } as KudoStyle,
   });
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    field: string
-  ) => {
-    setFormData((data) => ({ ...data, [field]: e.currentTarget.value }));
-  };
+ 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: string) => {
+    setFormData(data => ({ ...data, [field]: e.target.value }))
+}
 
-
-  const handleStyleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: string) => {
-    setFormData((data) => ({
-      ...data, style: {
-        ...data.style,
-        [field]: e.currentTarget.value
-      }
+const handleStyleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: string) => {
+    setFormData(data => ({
+        ...data, style: {
+            ...data.style,
+            [field]: e.target.value
+        }
     }))
-  }
-
+}
   const getOptions = (data: any) => Object.keys(data).reduce((acc: any[], curr) => {
     acc.push({
-      name: curr.charAt(0).toLocaleUpperCase() + curr.slice(1).toLocaleLowerCase(),
-      value: curr,
-    });
-    return acc;
+      name: curr.charAt(0).toUpperCase() + curr.slice(1).toLowerCase(),
+      value: curr
+    })
+    return acc
   }, [])
 
   const colors = getOptions(colorMap)
@@ -130,6 +127,7 @@ export default function KudoModal() {
         <br />
         <p className="text-blue-600 font-semibold mb-2">Preview</p>
         <div className="flex flex-col items-center md:flex-row gap-x-24 gap-y-2 md:gap-y-0">
+          <Kudo profile={user.profile} kudo={formData} />
           <div className="flex-1" />
           <button
             type="submit"
