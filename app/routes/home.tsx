@@ -5,10 +5,11 @@ import Layout from '~/components/layout';
 import { UserPanel } from '~/components/user-panel';
 import { getOtherUsers } from '~/utils/user.server';
 import { Outlet, useLoaderData } from '@remix-run/react';
-import { getFilteredKudos } from '~/utils/kudos.server';
-import type { Kudo as IKudo, Profile } from '@prisma/client';
+import { getFilteredKudos, getRecentKudos } from '~/utils/kudos.server';
+import type { Kudo as IKudo, Profile, Prisma } from '@prisma/client';
 import { Kudo } from '~/components/kudo';
 import { SearchBar } from '~/components/search-bar';
+import { RecentBar } from '~/components/recent-bar';
 interface KudoWithProfile extends IKudo {
   author: {
     profile: Profile;
@@ -16,15 +17,59 @@ interface KudoWithProfile extends IKudo {
 }
 
 export const loader: LoaderFunction = async ({ request, params }) => {
+  const url = new URL(request.url);
+  const sort = url.searchParams.get('sort');
+  const filter = url.searchParams.get('filter');
+  let sortOptions: Prisma.KudoOrderByWithRelationInput = {};
+
+  if (sort) {
+    if (sort === 'date') {
+      sortOptions = { createdAt: 'desc' };
+    }
+    if (sort === 'sender') {
+      sortOptions = { author: { profile: { firstName: 'asc' } } };
+    }
+    if (sort === 'emoji') {
+      sortOptions = { style: { emoji: 'asc' } };
+    }
+  }
+
+  let textFilter: Prisma.KudoWhereInput = {};
+
+  if (filter) {
+    textFilter = {
+      OR: [
+        { message: { mode: 'insensitive', contains: filter } },
+        {
+          author: {
+            OR: [
+              {
+                profile: {
+                  is: { firstName: { mode: 'insensitive', contains: filter } },
+                },
+              },
+              {
+                profile: {
+                  is: { lastName: { mode: 'insensitive', contains: filter } },
+                },
+              },
+            ],
+          },
+        },
+      ],
+    };
+  }
+
   const userId = await requireUserId(request);
   const users = await getOtherUsers(userId);
   console.log(users);
-  const kudos = await getFilteredKudos(userId, {}, {});
-  return json({ users, kudos });
+  const recentKudos = await getRecentKudos();
+  const kudos = await getFilteredKudos(userId, sortOptions, textFilter);
+  return json({ users, kudos, recentKudos });
 };
 
 export default function Home() {
-  const { users, kudos } = useLoaderData();
+  const { users, kudos, recentKudos } = useLoaderData();
   return (
     <Layout>
       <Outlet />
@@ -39,6 +84,7 @@ export default function Home() {
               ))}
             </div>
             {/* Recent Kudos Goes Here */}
+            <RecentBar kudos={recentKudos} />
           </div>
         </div>
       </div>
