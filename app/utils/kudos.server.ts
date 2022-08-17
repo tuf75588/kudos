@@ -1,36 +1,16 @@
-import { prisma } from "./prisma.server";
-import { KudoStyle, Prisma } from "@prisma/client";
+// app/utils/kudos.server.ts
 
-export const createKudo = async (
-  message: string,
-  userId: string,
-  recipientId: string,
-  style: KudoStyle
-) => {
-  await prisma.kudo.create({
-    data: {
-      message,
-      style,
-      author: {
-        connect: {
-          id: userId,
-        },
-      },
-      recipient: {
-        connect: {
-          id: recipientId,
-        },
-      },
-    },
-  });
-};
+import { prisma } from './prisma.server';
+import type { KudoStyle, Prisma } from '@prisma/client'
+
+// ...
 
 export const getFilteredKudos = async (
   userId: string,
   sortFilter: Prisma.KudoOrderByWithRelationInput,
-  whereFilter: Prisma.KudoWhereInput
+  whereFilter: Prisma.KudoWhereInput,
 ) => {
-  return prisma.kudo.findMany({
+  return await prisma.kudo.findMany({
     select: {
       id: true,
       style: true,
@@ -48,5 +28,25 @@ export const getFilteredKudos = async (
       recipientId: userId,
       ...whereFilter,
     },
-  });
-};
+  })
+}
+export const createKudo = async (message: string, userId: string, recipientId: string, style: KudoStyle) => {
+  await prisma.kudo.create({
+    data: {
+      // 1
+      message,
+      style,
+      // 2
+      author: {
+        connect: {
+          id: userId,
+        },
+      },
+      recipient: {
+        connect: {
+          id: recipientId,
+        },
+      },
+    },
+  })
+}

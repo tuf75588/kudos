@@ -24,7 +24,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   return json({ recipient, user });
 };
 
-export const action: ActionFunction = async ({ request, params }) => {
+export const action: ActionFunction = async ({ request }) => {
   const userId = await requireUserId(request);
   const form = await request.formData();
   const message = form.get('message');
