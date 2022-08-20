@@ -1,6 +1,6 @@
 import { json } from '@remix-run/node';
 import type { LoaderFunction } from '@remix-run/node';
-import { requireUserId } from '~/utils/auth.server';
+import { requireUserId, getUser } from '~/utils/auth.server';
 import Layout from '~/components/layout';
 import { UserPanel } from '~/components/user-panel';
 import { getOtherUsers } from '~/utils/user.server';
@@ -18,6 +18,7 @@ interface KudoWithProfile extends IKudo {
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   const url = new URL(request.url);
+  const user = await getUser(request);
   const sort = url.searchParams.get('sort');
   const filter = url.searchParams.get('filter');
   let sortOptions: Prisma.KudoOrderByWithRelationInput = {};
@@ -62,21 +63,20 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 
   const userId = await requireUserId(request);
   const users = await getOtherUsers(userId);
-  console.log(users);
   const recentKudos = await getRecentKudos();
   const kudos = await getFilteredKudos(userId, sortOptions, textFilter);
-  return json({ users, kudos, recentKudos });
+  return json({ users, kudos, recentKudos, user});
 };
 
 export default function Home() {
-  const { users, kudos, recentKudos } = useLoaderData();
+  const { users, kudos, recentKudos, user } = useLoaderData();
   return (
     <Layout>
       <Outlet />
       <div className="h-full flex">
         <UserPanel users={users} />
         <div className="flex-1 flex flex-col">
-          <SearchBar />
+          <SearchBar profile={user.profile} />
           <div className="flex-1 flex">
             <div className="w-full p-10 flex flex-col gap-y-4">
               {kudos.map((kudo: KudoWithProfile) => (
