@@ -3,11 +3,13 @@ import { validateName } from '~/utils/validators.server';
 import { json } from '@remix-run/node';
 import { Modal } from '~/components/modal';
 import { useLoaderData } from '@remix-run/react';
-import { getUser } from '~/utils/auth.server';
+import { getUser, requireUserId } from '~/utils/auth.server';
 import React, { useState } from 'react';
 import FormField from '~/components/form-field';
 import { departments } from '~/utils/constants';
 import { SelectBox } from '~/components/select-box';
+import { updateUser } from '~/utils/user.server';
+import { Department } from '@prisma/client';
 
 export const loader: LoaderFunction = async ({ request }) => {
   const user = await getUser(request);
@@ -19,6 +21,7 @@ export const action: ActionFunction = async ({ request }) => {
   let firstName = form.get('firstName');
   let lastName = form.get('lastName');
   let department = form.get('department');
+  const userId = await requireUserId(request);
 
   // make sure types are correct
   if (
@@ -41,6 +44,11 @@ export const action: ActionFunction = async ({ request }) => {
       { status: 400 }
     );
   }
+  await updateUser(userId, {
+    firstName,
+    lastName,
+    department: department as Department
+  })
   return redirect('/home');
 };
 
